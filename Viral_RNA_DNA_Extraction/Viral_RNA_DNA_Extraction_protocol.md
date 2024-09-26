@@ -1,7 +1,7 @@
 # Extraction Protocol for Swab/Fecal Samples (Using Omega Mag-Bind®
 Viral RNA/DNA Kit)
 Jonathan Dain
-2024-09-16
+2024-09-25
 
 <script src="Viral_RNA_DNA_Extraction_protocol_files/libs/kePrint-0.0.1/kePrint.js"></script>
 <link href="Viral_RNA_DNA_Extraction_protocol_files/libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
@@ -25,14 +25,14 @@ The printable view code for this protocol can be found
 
 ## Procedure
 
-| Step_number | Description                                                                                                                                                                                                                   | Performer_Initials | Reviewer_Initials |
-|:------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------------|:------------------|
-| 1           | 1-2 hours before starting: thaw samples in orange rack on counter (benchtop thaw). Samples are from the field, so handle with universal precautions. Print out extraction plate map.                                          |                    |                   |
-| 2           | 15 minutes before starting: turn on the blower of the biosafety cabinet (BSC). Remember to place samples in mini-fridge after thaw to keep cool. Treat the hood with RNase Zap as well as the bench space labeled RNAse Free. |                    |                   |
-| 3           | Flip sign on door “Low Path Avian Influenza work in progress”. Put on PPE for BSL2+ work: gloves x 2, Tyvek, booties, goggles                                                                                                 |                    |                   |
-| 4           | Wipe down the grey counters and Kingfisher robot with RNase Zap to remove enzymes common on surfaces that degrade RNA. Additionally wipe with Quartricide.                                                                    |                    |                   |
-| 5           | Retrieve Mag-Bind Viral RNA/DNA Kit from shelf. Use currently open kit before opening new kit. It should be labeled as 'current kit'                                                                                          |                    |                   |
-| 6           | Disinfect the BSC. Spray a paper towel with quatricide and wipe all reagents, pipettes, tip boxes and equipment before placing inside BSC, see table on next page for list of reagents:                                       |                    |                   |
+| Step_number | Description                                                                                                                                                                                                                                     | Performer_Initials | Reviewer_Initials |
+|:------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------------|:------------------|
+| 1           | 1-2 hours before starting: thaw samples in orange rack on counter (benchtop thaw). Samples are from the field, so handle with universal precautions. Print out extraction plate map. Arrange samples in rows of 11 on orange 'extraction' racks |                    |                   |
+| 2           | 15 minutes before starting: turn on the blower of the biosafety cabinet (BSC). Remember to place samples in mini-fridge after thaw to keep cool. Treat the hood with RNase Zap as well as the bench space labeled RNAse Free.                   |                    |                   |
+| 3           | Flip sign on door “Low Path Avian Influenza work in progress”. Put on PPE for BSL2+ work: gloves x 2, Tyvek, booties, goggles                                                                                                                   |                    |                   |
+| 4           | Wipe down the grey counters and Kingfisher robot with Quatricide, then with RNase Zap to remove enzymes common on surfaces that degrade RNA.                                                                                                    |                    |                   |
+| 5           | Retrieve Mag-Bind Viral RNA/DNA Kit from shelf. Use currently open kit before opening new kit. It should be labeled as 'current kit'                                                                                                            |                    |                   |
+| 6           | Disinfect the BSC. Spray a paper towel with quatricide and wipe all reagents, pipettes, tip boxes and equipment before placing inside BSC. Spray pipettes with RNAZap as well. See table on next page for list of reagents:                     |                    |                   |
 
 ------------------------------------------------------------------------
 
@@ -43,8 +43,8 @@ Equipment and Reagent list:
 | 1 x 200 uL Pipette                    |        | Linear polyacrylamide |        |
 | 1 x 200µl multichannel pipette        |        | Mag-bind Beads CNR    |        |
 | 200uL filter tips                     |        | VTM aliquotes         |        |
-| 4 x sterile reservoir boats           |        | Postive Control       |        |
-| Omega Mag-Bind Viral DNA/RNA 96 Kit   |        |                       |        |
+| 1 x 20uL multichannel pipette         |        | Postive Control       |        |
+| 30uL filter tips                      |        |                       |        |
 | 1 x Kingfisher standard 96 well plate |        |                       |        |
 | 4 x Kingfisher 96 deep-well plates    |        |                       |        |
 | 2 x small Biohazard bags              |        |                       |        |
@@ -59,6 +59,9 @@ Equipment and Reagent list:
 | 1 x VHB buffer                        |        |                       |        |
 | 1 x SPR buffer                        |        |                       |        |
 | 1 x Nuclease-free water               |        |                       |        |
+| 4 x sterile reservoir boats           |        |                       |        |
+| 1 x 1000uL pipette                    |        |                       |        |
+| 1 x pipette aid                       |        |                       |        |
 
 | Step_number | Description                                                                                                                                                                                                                                                                                                         | Performer_Initials | Reviewer_Initials |
 |:------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------------|:------------------|
@@ -72,7 +75,7 @@ Equipment and Reagent list:
 | 12          | In your SPR1 KF deep well plate: Add 200μL of SPR buffer to each well. Use the multi-channel P200 pipette.                                                                                                                                                                                                          |                    |                   |
 | 13          | In your SPR2 KF deep well plate: Add 200μL of SPR buffer to each well. Use the multi-channel P200 pipette.                                                                                                                                                                                                          |                    |                   |
 | 14          | Add 50μL of Nuclease-free water to each well except H12 in the “RNA-DNA_YYYYMMDD” plate. This plate will be kept for qPCR and sequencing. Use the multichannel P200 pipette.                                                                                                                                        |                    |                   |
-| 15          | Load plates into Kingfisher robot. Select “ViralRNA_DNA” program. When prompted load each plate and a new tip comb into the loading stage of carousel. Use the same tip pickup plate as when performing step 9, the maintenance check. The Lysis plate will be missing, close KF door and continue with next steps. |                    |                   |
+| 15          | Load plates into Kingfisher robot. Select “ViralRNA_DNA” program. When prompted load each plate and a new tip comb into the loading stage of carousel. Use the same tip pickup plate as when performing step 7, the maintenance check. The Lysis plate will be missing, close KF door and continue with next steps. |                    |                   |
 | 16          | Remove Mag Bind Particles CNR and linear acrylamide from fridge, and vortex only the Mag bind particles for 2 mins (to reduce clumping). Do not vortex the linear acrylamide.                                                                                                                                       |                    |                   |
 | 17          | Make up Viral Lysis Solution and Beads in a 15ml conical and 2mL eppendorf tube respectively using volumes for 1 full plate. See table below for reagent volumes.                                                                                                                                                   |                    |                   |
 
@@ -82,9 +85,9 @@ Equipment and Reagent list:
 |:----------------------|:------------|:-----------------------|:-----------------------|:------------------------|
 | TNA Lysis Buffer      | 60 uL       | 780 uL                 | 3.36ml                 | 6.72 mL                 |
 | Linear polyacrylamide | 0.4 uL      | 5.2 uL                 | 22 uL                  | 44.8 uL                 |
-| Mix Briefly           | --          | --                     | --                     | --                      |
+| Mix Briefly           | ✓           | ✓                      | ✓                      | ✓                       |
 | 100% Isopropanol      | 70 uL       | 910 uL                 | 3.92 mL                | 7.84 mL                 |
-| Vortex                | --          | --                     | --                     | --                      |
+| Vortex                | ✓           | ✓                      | ✓                      | ✓                       |
 
 
 
@@ -94,7 +97,7 @@ Equipment and Reagent list:
 |:----------------------|:------------|:-----------------------|:-----------------------|:------------------------|
 | Mag-Bind Beads CNR    | 5 uL        | 65 uL                  | 260 uL                 | 520 uL                  |
 | Protienase K Solution | 5 uL        | 65 uL                  | 260 uL                 | 520 uL                  |
-| Vortex                | --          | --                     | --                     | --                      |
+| Vortex                | ✓           | ✓                      | ✓                      | ✓                       |
 
 | Step_number | Description                                                                                                                                                                                                | Performer_Initials | Reviewer_Initials |
 |:------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------------|:------------------|
@@ -110,22 +113,22 @@ snacks/lunch and come back***</u>
 
 </center>
 
-| Step_number | Description                                                                                                                                                                                                      | Performer_Initials | Reviewer_Initials |
-|:------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------------|:------------------|
-| 20          | Get red ice bucket and fill with ice. To avoid RNA degradation, samples are kept on ice inside the BSC.                                                                                                          |                    |                   |
-| 21          | On the grey counter outside hood, arrange 22 thawed samples in two rows of 11 in ice bucket. Place the samples lying upright on top of the ice. Place remaining samples back in small fridge for the time being. |                    |                   |
-| 22          | Person A: Vortex and opens sample tube with a quatricide sprayed paper towel. Dispose of paper towel after each row of samples, or as needed to maintain sterile procedure.                                      |                    |                   |
-|             | Person B: Add 50µl of sample to ‘Lysate’ plate. (Place pipette tip under the surface of lysis solution to prevent aerosolization). Use a fresh P200 tip for each sample.                                         |                    |                   |
-| 23          | Add negative controls, i.e. 50uL VTM (or PBS) into column ‘12’ for 6 rows (A through F). Leftover is discarded after plate is finished.                                                                          |                    |                   |
-| 24          | Add positive control, i.e. 50uL positive control (PR8 virus) into column ‘G12’ of last row. Leave well H12 blank (to add qPCR control at a later stage).                                                         |                    |                   |
-| 25          | Briefly vortex bead solution and pipette into an 8-tube PCR strip (130uL each tube).                                                                                                                             |                    |                   |
-| 26          | In your ‘Lysate’ plate: Add 10uL of bead solution to each well. Use the multi-channel P20 pipette with PDF30ST pipette tips. Mix by pipetting up and down twice.                                                 |                    |                   |
-| 27          | Load 28. Load lysate plate into KF robot. Press ‘Start’ button to initiate the cycle. Note any changes/notes on the extraction plate maps.                                                                       |                    |                   |
-| 28          | Return samples to the boxes in -80. Mark each sample with a slash on lid using a sharpie to indicate a freeze/thaw.                                                                                              |                    |                   |
-| 29          | Disinfect hood and all items used during extraction with quatricide. Leave blower on for 15 minutes after the hood has been cleaned out.                                                                         |                    |                   |
-| 30          | Make note of reagents that are low or if we need to order more. Submit requests to Quartzy.                                                                                                                      |                    |                   |
-| 31          | Come back in ~ 45 minutes to store extracted RNA plate in -80 freezer.                                                                                                                                           |                    |                   |
-| 32          | Place extraction map, signed protocl, and any notes in the 'extraction map' binder in 3200 lab space                                                                                                             |                    |                   |
+| Step_number | Description                                                                                                                                                                                                                | Performer_Initials | Reviewer_Initials |
+|:------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------------|:------------------|
+| 20          | Get red ice bucket and fill with ice. To avoid RNA degradation, samples are kept on ice inside the BSC.                                                                                                                    |                    |                   |
+| 21          | On the grey counter outside hood, arrange 22 thawed samples in two rows of 11 in ice bucket. Place the samples lying on side on top of the ice. Place remaining samples back in small fridge for the time being.           |                    |                   |
+| 22          | Person A: Vortex and opens sample tube with a quatricide sprayed paper towel. Dispose of paper towel after each row of samples, or as needed to maintain sterile procedure.                                                |                    |                   |
+|             | Person B: Add 50µl of sample to ‘Lysate’ plate. (Place pipette tip under the surface of lysis solution to prevent aerosolization). Use a fresh P200 tip for each sample. Repeat step 22 untill all samples have been added |                    |                   |
+| 23          | Add negative controls, i.e. 50uL VTM (or PBS) into column ‘12’ for 6 rows (A through F). Leftover is discarded after plate is finished.                                                                                    |                    |                   |
+| 24          | Add positive control, i.e. 50uL positive control (PR8 virus) into column ‘G12’ of last row. Leave well H12 blank (to add qPCR control at a later stage).                                                                   |                    |                   |
+| 25          | Briefly vortex bead solution and pipette into an 8-tube PCR strip (130uL each tube).                                                                                                                                       |                    |                   |
+| 26          | In your ‘Lysate’ plate: Add 10uL of bead solution to each well. Use the multi-channel P20 pipette with PDF30ST pipette tips. Mix by pipetting up and down twice.                                                           |                    |                   |
+| 27          | Load 28. Load lysate plate into KF robot. Press ‘Start’ button to initiate the cycle. Note any changes/notes on the extraction plate maps.                                                                                 |                    |                   |
+| 28          | Return samples to the boxes in -80. Mark each sample with a slash on lid using a sharpie to indicate a freeze/thaw.                                                                                                        |                    |                   |
+| 29          | Disinfect hood and all items used during extraction with quatricide. Leave blower on for 15 minutes after the hood has been cleaned out.                                                                                   |                    |                   |
+| 30          | Make note of reagents that are low or if we need to order more. Submit requests to Quartzy.                                                                                                                                |                    |                   |
+| 31          | Come back in ~ 45 minutes to store extracted RNA plate in -80 freezer.                                                                                                                                                     |                    |                   |
+| 32          | Place extraction map, signed protocl, and any notes in the 'extraction map' binder in 3200 lab space                                                                                                                       |                    |                   |
 
 ## Disinfecting & Waste Disposal:
 
