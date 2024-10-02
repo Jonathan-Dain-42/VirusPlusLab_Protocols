@@ -51,9 +51,9 @@ tibble(`Item in BSC`=character(),check1=character(),`Item in Mini Fridge`=charac
   add_row(`Item in BSC`="1 x Kingfisher standard 96 well plate",check1="",`Item in Mini Fridge`="",check2="") |> 
   add_row(`Item in BSC`="4 x Kingfisher 96 deep-well plates",check1="",`Item in Mini Fridge`="",check2="") |> 
   add_row(`Item in BSC`="2 x small Biohazard bags",check1="",`Item in Mini Fridge`="",check2="") |> 
-  add_row(`Item in BSC`="Aliquot of VTM for negative control",check1="",`Item in Mini Fridge`="",check2="") |> 
   add_row(`Item in BSC`="2 x 10ml stripette",check1="",`Item in Mini Fridge`="",check2="") |> 
-  add_row(`Item in BSC`="2 x 15ml conical tubes",check1="",`Item in Mini Fridge`="",check2="") |> 
+  add_row(`Item in BSC`="1 x 2mL Eppendorf Tube",check1="",`Item in Mini Fridge`="",check2="") |> 
+  add_row(`Item in BSC`="1 x 15ml conical tubes",check1="",`Item in Mini Fridge`="",check2="") |> 
   add_row(`Item in BSC`="1 x vortex",check1="",`Item in Mini Fridge`="",check2="") |> 
   add_row(`Item in BSC`="1 x pink tube rack",check1="",`Item in Mini Fridge`="",check2="") |> 
   add_row(`Item in BSC`="1 x TNA lysis buffer",check1="",`Item in Mini Fridge`="",check2="") |> 
@@ -84,7 +84,7 @@ df |>
   add_row(Step_number="12",Description="In your SPR1 KF deep well plate: Add 200μL of SPR buffer to each well. Use the multi-channel P200 pipette.",Performer_Initials="",Reviewer_Initials="") |> 
   add_row(Step_number='13',Description="In your SPR2 KF deep well plate: Add 200μL of SPR buffer to each well. Use the multi-channel P200 pipette.",Performer_Initials="",Reviewer_Initials="") |> 
   add_row(Step_number="14",Description="Add 50μL of Nuclease-free water to each well except H12 in the “RNA-DNA_YYYYMMDD” plate. This plate will be kept for qPCR and sequencing. Use the multichannel P200 pipette.",Performer_Initials="",Reviewer_Initials="") |> 
-  add_row(Step_number="15",Description="Load plates into Kingfisher robot. Select “ViralRNA_DNA” program. When prompted load each plate and a new tip comb into the loading stage of carousel. Use the same tip pickup plate as when performing step 7, the maintenance check. The Lysis plate will be missing, close KF door and continue with next steps.",Performer_Initials="",Reviewer_Initials="") |> 
+  add_row(Step_number="15",Description="Load plates into Kingfisher robot. Select “Viral_RNA_DNA_OBT_20241002” program. When prompted load each plate and a new tip comb into the loading stage of carousel. Use the same tip pickup plate as when performing step 7, the maintenance check. The Lysis plate will be missing, close KF door and continue with next steps.",Performer_Initials="",Reviewer_Initials="") |> 
   add_row(Step_number="16",Description="Remove Mag Bind Particles CNR and linear acrylamide from fridge, and vortex only the Mag bind particles for 2 mins (to reduce clumping). Do not vortex the linear acrylamide.",Performer_Initials="",Reviewer_Initials="") |> 
   add_row(Step_number="17",Description="Make up Viral Lysis Solution and Beads in a 15ml conical and 2mL eppendorf tube respectively using volumes for 1 full plate. See table below for reagent volumes.",Performer_Initials="",Reviewer_Initials="") |> 
   kable() |> 
@@ -164,7 +164,7 @@ df |>
 34. Using sterile procedures, remove PPE, place in appropriate storage containers or biohazard waste. Wash hands with soap and water for 20 seconds. Remove sign as you exit the room.\
 35. When the extraction is complete (\~41mins), cover elution plate with foil (optional: make 50 uL aliquots). Store at 4$^\circ$C for use within 2-3 hours. Store at -80$^\circ$C for longer term use.\
 36. Dispose of combs and lysate plates in biohazard trash.\
-37. Clean the Kingfisher buffer plates for re-use (VHB, SPM and tip-pickup). Use squirt bottle with 10% bleach to fill each well. Set aside for 15 mins. Discard liquid down the sink. Rinse with warm running tap water until wells are clear. Soak plates in quatricide overnight (mimic color of quatricide spray bottle (1:64).
+37. Clean the Kingfisher buffer plates for re-use (VHB, SPR 1 & 2, and tip-pickup). Use squirt bottle with 10% bleach to fill each well. Set aside for 15 mins. Discard liquid down the sink. Rinse with warm running tap water until wells are clear. Soak plates in quatricide overnight (mimic color of quatricide spray bottle (1:64).
 
 [Following day 1:]{.underline} 38. Discard liquid down the sink. Rinse with warm running tap water until wells are clear. Soak plates overnight in DI water.
 
