@@ -1,7 +1,7 @@
 ---
 title: "Extraction Protocol for Swab/Fecal Samples (Using Omega Mag-Bind® Viral RNA/DNA Kit)"
 author: "Jonathan Dain"
-date: "2024-09-25"
+date: "2024-12-22"
 format: gfm
 prefer-html: TRUE
 ---
@@ -11,7 +11,7 @@ prefer-html: TRUE
 pacman::p_load(tidyverse,knitr)
 ```
 
-## Purpose:aSaSas
+## Purpose:
 
 The purpose of this protocol is to extract viral RNA from samples - oral swab or cloacal swabs taken from a bird usually - that have been stored in viral transport media (VTM). This protocol is semi-automated, meaning that half of it is performed by personnel and the other half is performed on the Thermo Fisher Kingfisher Flex benchtop robot. The protocol should take about **2-3 hours** to complete with a 47 minute robot handling time. Two VirusPlus Lab personnel are required for the performance of this extraction.
 
@@ -64,7 +64,11 @@ tibble(`Item in BSC`=character(),check1=character(),`Item in Mini Fridge`=charac
   add_row(`Item in BSC`="1 x Nuclease-free water",check1="",`Item in Mini Fridge`="",check2="") |> 
   add_row(`Item in BSC`="4 x sterile reservoir boats",check1="",`Item in Mini Fridge`="",check2="") |> 
   add_row(`Item in BSC`="1 x 1000uL pipette",check1="",`Item in Mini Fridge`="",check2="") |> 
+  add_row(`Item in BSC`='1000uL filter tips',check1='',`Item in Mini Fridge`='',check2='') |> 
   add_row(`Item in BSC`="1 x pipette aid",check1="",`Item in Mini Fridge`="",check2="") |> 
+  add_row(`Item in BSC`='1 x Well Plate Tray',check1='',`Item in Mini Fridge`='',check2='') |> 
+  add_row(`Item in BSC`='1 x 8-tube PCR strip',check1='',`Item in Mini Fridge`='',check2='') |> 
+  add_row(`Item in BSC`='1 x Sharpie',check1='',`Item in Mini Fridge`='',check2='') |> 
   kable() |> 
   kableExtra::column_spec(1:4,border_left = T, border_right = T) |> 
   kableExtra::kable_styling()
