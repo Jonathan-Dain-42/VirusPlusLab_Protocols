@@ -4,6 +4,7 @@ author: "Jonathan Dain"
 date: "2024-12-22"
 format: gfm
 prefer-html: TRUE
+format-links: false
 ---
 
 ```{r - setup,eval=TRUE,echo=FALSE}
