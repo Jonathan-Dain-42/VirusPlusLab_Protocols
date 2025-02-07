@@ -1,0 +1,152 @@
+# qPCR_Wrangler_Script_Beta
+Jonathan Dain
+2025-02-07
+
+## Date Last Update
+
+2025-02-07
+
+## Packages Used.
+
+``` r
+#install.packages("pacman") # Use if the pacman package is not already on machine
+pacman::p_load(readxl,tidyverse)
+```
+
+## Set the directory
+
+In other words where do you want this “point’n’shoot” script to work.
+
+``` r
+getwd()
+```
+
+    [1] "/Users/jonathandain/My_Files/My_Code/VirusPlusLab_Protocols/qPCR_Data_Synthesis"
+
+``` r
+setwd(dir = "/Users/jonathandain/University of Massachusetts Boston/Nichola J Hill - VirusPlusLab/Screening/Extraction/")
+```
+
+You will get an error message if you run this in a .rmd or .qmd file.
+Don’t worry the problem us just that the working directory is set
+automatically for these file types. **Work around this by copying that
+`setwd()` command into the code chunks below!**
+
+``` r
+#set wd
+setwd(dir = "/Users/jonathandain/University of Massachusetts Boston/Nichola J Hill - VirusPlusLab/Screening/Extraction/")
+
+#pull out file names
+tibble(file_name=list.files())->M_gene_pcrs
+
+# filter out the template, AAF and archive
+M_gene_pcrs |> 
+  filter(file_name!="~$Raw_sample_TEMPLATE_UMB copy.tmp") |> 
+  filter(file_name!="AAF_20240913.xlsx") |> 
+  filter(file_name!="Archive") |> 
+  filter(file_name!="Raw_sample_TEMPLATE_UMB.xlsx") |> 
+  filter(file_name!="Raw_sample_20240403.xlsx") |> 
+  filter(file_name!="Raw_sample_20241017.xlsx")->M_gene_pcrs
+
+# pull out extraction dates:
+M_gene_pcrs |> 
+  mutate(extraction_date=str_split(string = file_name,pattern = "_") |> map_chr(3)) |> 
+  mutate(extraction_date=str_split(string=extraction_date,pattern = "\\.") |> map_chr(1))-> M_gene_pcrs
+
+# get the paths
+# M_gene_pcrs |> 
+#   mutate(file_path=paste('/Users/jonathandain/University of Massachusetts Boston/Nichola J Hill - VirusPlusLab/Screening/Extraction/',file_name,sep = '')) |> 
+#   # mutate(file_path=paste0('"',file_path,'"')) |> 
+#   rowwise() |> 
+#   mutate(dat=read_excel(path = file_path,skip = 24,col_names = T))
+
+# Read in all the data files:
+M_gene_pcrs <- M_gene_pcrs |>
+  mutate(file_path = paste('/Users/jonathandain/University of Massachusetts Boston/Nichola J Hill - VirusPlusLab/Screening/Extraction/', file_name, sep = '')) |>
+  mutate(dat = map(file_path, ~read_excel(path = .x, skip = 24, col_names = TRUE,sheet = "Results")))
+```
+
+``` r
+# read in your positive template
+positive_template <- read_excel(path = "/Users/jonathandain/University of Massachusetts Boston/Nichola J Hill - VirusPlusLab/Screening/qPCR/qPCR_positives/Matrix_positive_list/qPCR_positive_list_template.xlsx",col_names = T)
+
+
+Extract_qPCR_Positives <- function(data){
+for (i in 1:length(data)){
+  # print(data[[i]][1,])
+  #Prune to Amps without controls
+  print(i)
+  data[[i]] |> 
+  mutate(`Amp Status`=tolower(`Amp Status`)) |> 
+  filter(`Amp Status`=="amp") |> 
+  filter(Sample!="PR8") |> 
+  filter(Task!="POSITIVE_CONTROL") |> 
+  select(`Well Position`,Sample,`Amp Status`,Cq)->tmp
+  # add it to the template
+  if (nrow(tmp)!=0){
+  for (j in 1:nrow(tmp)){
+  
+  #extraction_date
+  new_row <- list(NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA)
+  new_row[2] <- tmp$Sample[j]
+  new_row[4] <- dates[[i]]
+  new_row[5] <- tmp$`Well Position`[j]
+  new_row[6] <- tmp$Cq[j]
+  new_row <- setNames(object = new_row,colnames(positive_template))
+  positive_template <- rbind(positive_template,new_row)
+  #print(tmp$Sample[j])
+}}
+}
+  return(positive_template)
+}
+```
+
+Creat a data object and a date object
+
+``` r
+obj <- M_gene_pcrs$dat
+dates <- M_gene_pcrs$extraction_date
+```
+
+Run the function:
+
+``` r
+Extract_qPCR_Positives(obj) ->positives
+```
+
+    [1] 1
+    [1] 2
+    [1] 3
+    [1] 4
+    [1] 5
+    [1] 6
+    [1] 7
+    [1] 8
+    [1] 9
+    [1] 10
+    [1] 11
+    [1] 12
+    [1] 13
+    [1] 14
+    [1] 15
+    [1] 16
+    [1] 17
+    [1] 18
+    [1] 19
+    [1] 20
+    [1] 21
+    [1] 22
+    [1] 23
+    [1] 24
+    [1] 25
+    [1] 26
+    [1] 27
+    [1] 28
+    [1] 29
+    [1] 30
+    [1] 31
+    [1] 32
+    [1] 33
+    [1] 34
+    [1] 35
+    [1] 36

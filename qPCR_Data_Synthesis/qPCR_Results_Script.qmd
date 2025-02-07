@@ -1,0 +1,31 @@
+---
+title: "qPCR_Results_Script"
+subtitle: "A document detailing the functions in R that will allow for digitizing the qPCR results into our Raw Sample Extraction Template"
+format: html
+toc: TRUE
+author: Jonathan Dain
+---
+
+
+```{r}
+#' First we need to develope the functions that will allow us to do this. 
+
+pacman::p_load(tidyverse,readxl,openxlsx)
+
+```
+
+```{r}
+# load your results and raw sample
+results <- read_excel("Example_Data_For_Dev/qPCR_IAV_matrix_20241115_results.xls", sheet = "Results")
+
+raw_sample <- loadWorkbook(file = "Example_Data_For_Dev/Raw_sample_20241212.xlsx")
+addWorksheet(raw_sample, "Results")
+writeData(raw_sample, "Results", results)
+saveWorkbook(raw_sample, "Example_Data_For_Dev/Raw_sample_20241212_edited.xlsx", overwrite = TRUE) 
+
+```
+
+
+Ok this works but I need to ensure that it "ALWAYS" works and that the data is identical between the two! I will do it manually and then compare if they are identical. 
+
+

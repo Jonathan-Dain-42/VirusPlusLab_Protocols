@@ -1,0 +1,120 @@
+---
+title: "qPCR_Positives_Script"
+format: html
+editor_options: 
+  chunk_output_type: console
+---
+
+Ok so the goal here is to generate a series of functions that can be used to pull in the positive samples from a PCR run into a 'pcr positive' datasheet specifically a .xlsx file. 
+
+
+```{r}
+#load some packages
+
+pacman::p_load(tidyverse,readxl,openxlsx)
+```
+
+```{r}
+# load a example dataset from my current Maryland data that I know has some samples. 
+positive_template <- read_excel(path = "/Users/jonathandain/University of Massachusetts Boston/Nichola J Hill - VirusPlusLab/Screening/qPCR/qPCR_positives/qPCR_positive_list_template.xlsx",col_names = T)
+
+```
+
+
+```{r}
+# Read in the example dataset 
+
+data20250109 <- read_excel(path = "/Users/jonathandain/OneDrive - University of Massachusetts Boston/Temp_qPCR_Run_Files/qPCR_IAV_matrix_20250109.xls",col_names = T,skip = 24)
+
+data20250110 <- read_excel(path = "/Users/jonathandain/OneDrive - University of Massachusetts Boston/Temp_qPCR_Run_Files/qPCR_IAV_matrix_20250110.xls",col_names = T,skip = 24)
+
+data20250114 <- read_excel(path = "/Users/jonathandain/OneDrive - University of Massachusetts Boston/Temp_qPCR_Run_Files/qPCR_IAV_matrix_20250114.xls",col_names = T,skip = 24)
+
+data20250115 <- read_excel(path = "/Users/jonathandain/OneDrive - University of Massachusetts Boston/Temp_qPCR_Run_Files/qPCR_IAV_matrix_20250115.xls",col_names = T,skip = 24)
+
+data20250116 <- read_excel(path = "/Users/jonathandain/OneDrive - University of Massachusetts Boston/Temp_qPCR_Run_Files/qPCR_IAV_matrix_20250116.xls",col_names = T,skip = 24)
+```
+
+
+```{r}
+
+data |> 
+  filter(`Amp Status`=="AMP") |> 
+  filter(Sample!="PR8") |> 
+  select(`Well Position`,Sample,`Amp Status`,Cq)->tmp
+
+extraction_date <- '2025-01-16'
+
+for (i in 1:nrow(tmp)){
+  extraction_date
+  new_row <- list(NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA)
+  new_row[2] <- tmp$Sample[i]
+  new_row[4] <- extraction_date
+  new_row[5] <- tmp$`Well Position`[i]
+  new_row[6] <- tmp$Cq[i]
+  new_row <- setNames(object = new_row,colnames(positive_template))
+  positive_template <- rbind(positive_template,new_row)
+}
+
+
+
+
+```
+
+We need a function to pull in the values from each row and then paste them in each one. 
+
+```{r}
+
+obj <- list(data20250109,data20250110,data20250114,data20250115,data20250116)
+dates <- list("2025-01-09","2025-01-10","2025-01-14","2025-01-15","2025-01-16")
+
+Extract_qPCR_Positives <- function(data){
+for (i in 1:length(data)){
+  # print(data[[i]][1,])
+  #Prune to Amps without controls
+  data[[i]] |> 
+  filter(`Amp Status`=="AMP") |> 
+  filter(Sample!="PR8") |> 
+  select(`Well Position`,Sample,`Amp Status`,Cq)->tmp
+  # add it to the template
+  for (j in 1:nrow(tmp)){
+  #extraction_date
+  new_row <- list(NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA)
+  new_row[2] <- tmp$Sample[j]
+  new_row[4] <- dates[[i]]
+  new_row[5] <- tmp$`Well Position`[j]
+  new_row[6] <- tmp$Cq[j]
+  new_row <- setNames(object = new_row,colnames(positive_template))
+  positive_template <- rbind(positive_template,new_row)
+  print(tmp$Sample[j])
+}
+}
+  return(positive_template)
+}
+
+
+
+Extract_qPCR_Positives(obj) ->positives
+
+positives |> 
+  mutate(Matrix.Cq=as.numeric(Matrix.Cq)) |> as_tibble()->positives
+
+
+positives |> 
+  mutate(Direct=ifelse(Matrix.Cq<32,yes='yes',no='no')) |>
+  group_by(Direct) |> count()
+
+positives |> 
+  mutate(Aliquoted=ifelse(Extraction.date%in%dates[2:4],yes="YES",no="NO"))-> positives
+
+write_csv(x = positives,file = "/Users/jonathandain/University of Massachusetts Boston/Nichola J Hill - VirusPlusLab/Screening/qPCR/qPCR_positives/Maryland_qPCR_positive_list_20250123.csv",col_names = T)
+
+```
+
+
+```{r}
+range(positives$Matrix.Cq)
+
+
+```
+
