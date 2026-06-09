@@ -3,8 +3,9 @@ title: "Extraction Protocol for Swab/Fecal Samples (Using Omega Mag-Bind® Viral
 author: "Jonathan Dain"
 date: "2024-12-22"
 format: gfm
-prefer-html: TRUE
+prefer-html: true
 format-links: false
+
 ---
 
 ```{r - setup,eval=TRUE,echo=FALSE}
@@ -32,7 +33,8 @@ df |>
   add_row(Step_number="3",Description="Flip sign on door “Low Path Avian Influenza work in progress”. Put on PPE for BSL2+ work: gloves x 2, Tyvek, booties, goggles",Performer_Initials="",Reviewer_Initials="") |> 
   add_row(Step_number="4",Description="Wipe down the grey counters and Kingfisher robot with Quatricide, then with RNase Zap to remove enzymes common on surfaces that degrade RNA.",Performer_Initials="",Reviewer_Initials="") |> 
   add_row(Step_number="5",Description="Retrieve Mag-Bind Viral RNA/DNA Kit from shelf. Use currently open kit before opening new kit. It should be labeled as 'current kit'",Performer_Initials="",Reviewer_Initials="") |> 
-  add_row(Step_number="6",Description="Disinfect the BSC. Spray a paper towel with quatricide and wipe all reagents, pipettes, tip boxes and equipment before placing inside BSC. Spray pipettes with RNAZap as well. See table on next page for list of reagents:",Performer_Initials="",Reviewer_Initials="") |> kable() |> 
+  add_row(Step_number="6",Description="Disinfect the BSC. Spray a paper towel with quatricide and wipe all reagents, pipettes, tip boxes and equipment before placing inside BSC. Spray pipettes with RNAZap as well. See table on next page for list of reagents:",Performer_Initials="",Reviewer_Initials="") |> 
+  kable() |> 
   kableExtra::column_spec(1:4,border_left = T, border_right = T) |> 
   kableExtra::kable_styling()
 

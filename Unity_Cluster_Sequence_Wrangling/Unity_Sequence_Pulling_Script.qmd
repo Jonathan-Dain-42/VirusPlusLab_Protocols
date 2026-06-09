@@ -1,0 +1,11 @@
+---
+title: "Unity_Sequence_Pulling_Script"
+format: html
+---
+
+Hello there VirusPlus lab user. 
+
+If you are reading this it means that you would like to pull down some sequences (probably from Mt. Sinai) from the Unity computing cluster where they are being stored. 
+
+Why are they stored there well because they are very large files that we want to make sure we keep safe and off of our local harddrive. 
+

@@ -1,0 +1,1384 @@
+---
+title: "Visualizing_Primer_Binding"
+author: "Jonathan Dain"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+lightbox: true
+---
+
+## Goal:
+
+To produce a figure that allows us to visualize the location and binding of our primers in a reproducable way.
+
+## Packages
+
+```{r}
+
+#| echo: true
+#| eval: true
+
+library(tidyverse)
+library(Biostrings)
+
+```
+
+## An example with flu and a matrix gene:
+
+Context: This is segment 7 from a HPAI virus that was isolated on Nantucket Island from a Dying GBBG. It was sequenced by Mt. Sinai and below is the sequence from that gene.
+
+We will be using the Biostrings package to visualize it briefly and find the matches for the primers.
+
+```{r}
+
+mgene <- DNAString("AGCAAAAGCAGGTAGATATTGAAAGATGAGTCTTCTAACCGAGGTCGAAACGTACGTTCTCTCTATCGTCCCGTCGGGCCCCCTCAAAGCCGAGATCGCGCAGAGACTTGAAGATGTCTTTGCAGGGAAGAACACCGATCTTGAGGCTCTCATGGAATGGCTAAAGACAAGACCAATCCTGTCACCTCTGACTAAGGGGATTTTGGGATTTGTGTTCACGCTCACCGTGCCCAGTGAGCGAGGACTGCAGCGTAGACGCTTTGTCCAAAATGCTCTAAATGGAAATGGAGACCCAAACAACATGGACAGGGCAGTCAAGTTGTACAGGAAACTGAAGAGAGAGATAACATTCCATGGGGCTAAAGAAGTTGCACTCAGTTACTCAACCGGTGCACTTGCCAGTTGTATGGGTCTCATATACAACAGGATGGGGACGGTGACCGCAGAAGTGGCATTGGGCCTAGTGTGTGCCACATGTGAGCAGATTGCTGATTCACAGCATCGGTCTCACAGACAGATAGCTACCACCACCAACCCACTAATCAGACATGAAAACAGAATGGTGTTGGCCAGTACTACAGCTAAGGCTATGGAGCAGATGGCTGGATCGAGTGAGCAAGCAGTGGAAGCCATGGAGGTTGCTAGTCAGGCTAGGCAGATGGTGCAGGCGATGAGGACCATTGGAACTCATCCTAGCTCCAGTGCCGGTCTGAGAGATGATCTCCTTGAAAATTTGCAGGCCTACCAAAAACGGATGGGAGTGCAACTACAGCGATTCAAGTGATCCTCTCGTTATTGCCGCAAGTATCATTGGGATCTTGCACTTGATATTGTGGATTCTTGATCGCCTTTTCTTCAAATGCGTTTATCGTCGCCTTAAATACGGTTTGAAAGGAGGGCCTTCTACGGAAGGAGTACCTGAGTCCATGAGGGAAGAGTACCGGCAGGAGCAGCAGAGTGCTGTGGATGTTGACGATGGTCATTTTGTCAACATAGAGCTGGAGTAAAAAACTACCTTGTTTCTACT")
+
+mgene
+
+```
+
+As we can see it is 1027 bases long and it is important to remember that the orientation of this cDNA is 5' to 3' as is standard in Bioinformatics.
+
+### Load your primers:
+
+Let's also read in our primers which are again written in the 5' to 3' direction.
+
+```{r}
+forward <- DNAString("AGATGAGTCTTCTAACCGAGGTCG")
+reverse <- DNAString("TGCAAAAACATCTTCAAGTCTCTG")
+```
+
+### FInding the matches:
+
+Ok so we want to know where these sequences match to our genome segment. Lets start with the forward primer.
+
+```{r}
+forward_match <- matchPattern(pattern = forward,subject = mgene)
+print(forward_match)
+```
+
+Great so we can see that the match is only in one spot and it starts from position 24 and ends at position 47 of our sequence. It is important to remember the following rules for primer binding in PCR.
+
+-   The forward primer is designed to bind to the complementary 3' to 5' template strand. This is why we can directly search for the pattern in the original sequence because it will match identically so it can bind to the complement.
+
+-   The reverse primer needs to bind to our 'top' or 'original' strand but needs to bind in the 3' to 5' direction. This poses some challenges:
+
+    -   You can't search for it directly since the pattern won't be found.
+    -   Our primer is in the 5' to 3' direction not 3' to 5'
+
+We can overcome this by creating the reverse complement of our primer and then searching for it on our sequence.
+
+```{r}
+
+reverse_complement <- reverseComplement(reverse)
+
+reverse_match <- matchPattern(pattern = reverse_complement, subject = mgene,max.mismatch = 1)
+print(reverse_match)
+
+```
+
+Amazing! We can find the primer! **Note** I allowed for one mismatch in this primer since I know that at one position there is a mismatch. (This took me longer than I would like to admit to find out)
+
+## Plotting it!
+
+Ok now we want to design a plot for this.
+
+First we need to trim down our M-gene to only the parts that matter for visualization, i.e. the parts between the primers!
+
+```{r}
+
+focal_segment <- mgene[20:125] # I gave some wiggle room on either side for visualization
+
+```
+
+Let's make a empty box that is the same size as our focal segment and then visuzalize it.
+
+```{r}
+
+focal_segment <- as.character(focal_segment)
+
+# Create a blank plot
+plot(x=1, 
+     type = "n", 
+     xlab = "", 
+     ylab = "", 
+     xlim = c(0, nchar(focal_segment)), 
+     ylim = c(0, 1), 
+     xaxt = "n", 
+     yaxt = "n")
+
+```
+
+Ok now let's add in the letters for our strand 1
+
+```{r}
+
+plot(x=1, 
+     type = "n", 
+     xlab = "", 
+     ylab = "", 
+     xlim = c(0, nchar(focal_segment)), 
+     ylim = c(0, 1), 
+     xaxt = "n", 
+     yaxt = "n")
+
+text(x = 1:nchar(focal_segment), 
+     y = rep(1, nchar(focal_segment)), 
+     labels = strsplit(focal_segment, "")[[1]], 
+     cex = 1)
+
+```
+
+Great now let's add the complement of this strand at the bottom
+
+```{r}
+comp <- complement(DNAString(focal_segment))
+
+comp <- as.character(comp)
+
+
+plot(x=1, 
+     type = "n", 
+     xlab = "", 
+     ylab = "", 
+     xlim = c(0, nchar(focal_segment)), 
+     ylim = c(0, 1), 
+     xaxt = "n", 
+     yaxt = "n")
+
+text(x = 1:nchar(focal_segment), 
+     y = rep(1, nchar(focal_segment)), 
+     labels = strsplit(focal_segment, "")[[1]], 
+     cex = 1)
+
+text(x = 1:nchar(comp), 
+     y = rep(0.9, nchar(comp)), 
+     labels = strsplit(comp, "")[[1]], 
+     cex = 1)
+
+```
+
+Let's also just add in lines for binding clarity
+
+```{r}
+
+
+plot(x=1, 
+     type = "n", 
+     xlab = "", 
+     ylab = "", 
+     xlim = c(0, nchar(focal_segment)), 
+     ylim = c(0, 1), 
+     xaxt = "n", 
+     yaxt = "n")
+
+text(x = 1:nchar(focal_segment), 
+     y = rep(1, nchar(focal_segment)), 
+     labels = strsplit(focal_segment, "")[[1]], 
+     cex = 1)
+
+text(x = 1:nchar(comp), 
+     y = rep(0.9, nchar(comp)), 
+     labels = strsplit(comp, "")[[1]], 
+     cex = 1)
+
+text(x = 1:nchar(comp), 
+     y = rep(0.95, nchar(comp)), 
+     labels = '|', 
+     cex = 1)
+
+```
+
+We also want to know the primes at the end of the strand let's add those.
+
+```{r,fig.width=13,fig.height=10}
+
+par(mar=c(0,0,0,0))
+plot(x=1, 
+     type = "n", 
+     xlab = "", 
+     ylab = "", 
+     xlim = c(0, nchar(focal_segment)), 
+     ylim = c(0, 1), 
+     xaxt = "n", 
+     yaxt = "n")
+
+text(x = 1:nchar(focal_segment), 
+     y = rep(1, nchar(focal_segment)), 
+     labels = strsplit(focal_segment, "")[[1]], 
+     cex = 0.7)
+
+text(x = 1:nchar(comp), 
+     y = rep(0.9, nchar(comp)), 
+     labels = strsplit(comp, "")[[1]], 
+     cex = 0.7)
+
+text(x = 1:nchar(comp), 
+     y = rep(0.95, nchar(comp)), 
+     labels = '|', 
+     cex = 0.7)
+
+# The five prime ends
+text(
+  x=c(-1,nchar(focal_segment)+2),
+  y=c(1,0.9),
+  labels="5'"
+)
+
+# the 3 prime ends
+text(
+  x=c(-1,nchar(focal_segment)+2),
+  y=c(0.9,1),
+  labels="3'"
+)
+
+```
+
+Ok so far so good. Now we want vizualize it splitting and the primers binding.
+
+Let's copy the original plot again and then split it lower down on the page.
+
+```{r}
+
+# Original plot
+par(mar=c(0,0,0,0))
+plot(x=1, 
+     type = "n", 
+     xlab = "", 
+     ylab = "", 
+     xlim = c(0, nchar(focal_segment)), 
+     ylim = c(0, 1), 
+     xaxt = "n", 
+     yaxt = "n")
+
+text(x = 1:nchar(focal_segment), 
+     y = rep(1, nchar(focal_segment)), 
+     labels = strsplit(focal_segment, "")[[1]], 
+     cex = 0.7)
+
+text(x = 1:nchar(comp), 
+     y = rep(0.9, nchar(comp)), 
+     labels = strsplit(comp, "")[[1]], 
+     cex = 0.7)
+
+text(x = 1:nchar(comp), 
+     y = rep(0.95, nchar(comp)), 
+     labels = '|', 
+     cex = 0.7)
+
+# The five prime ends
+text(
+  x=c(-1,nchar(focal_segment)+2),
+  y=c(1,0.9),
+  labels="5'"
+)
+
+# the 3 prime ends
+text(
+  x=c(-1,nchar(focal_segment)+2),
+  y=c(0.9,1),
+  labels="3'"
+)
+
+###### Split:
+
+text(labels="Strands after denaturation",y=0.75,x=53)
+
+#Top strand:
+text(x = 1:nchar(focal_segment), 
+     y = rep(0.7, nchar(focal_segment)), 
+     labels = strsplit(focal_segment, "")[[1]], 
+     cex = 0.7)
+
+# Bottom Strand
+text(x = 1:nchar(comp), 
+     y = rep(0.4, nchar(comp)), 
+     labels = strsplit(comp, "")[[1]], 
+     cex = 0.7)
+
+# The five prime ends
+text(
+  x=c(-1,nchar(focal_segment)+2),
+  y=c(0.7,0.4),
+  labels="5'"
+)
+
+# the 3 prime ends
+text(
+  x=c(-1,nchar(focal_segment)+2),
+  y=c(0.4,0.7),
+  labels="3'"
+)
+
+```
+
+Ok now let's add in the primers! Since we limited our scope to the focal segment let's just find the start of binding for each primer
+
+```{r}
+start_forward <- matchPattern(forward,subject=DNAString(focal_segment))
+start_reverse <- matchPattern(reverse_complement,subject = DNAString(focal_segment),max.mismatch = 1)
+```
+
+Ok the forward starts at 5 and the reverse starts at 82. WIth that we can begin.
+
+```{r,fig.width=11,fig.height=8}
+
+
+
+# Original plot
+par(mar=c(0,0,1,0))
+plot(x=1, 
+     type = "n", 
+     xlab = "", 
+     ylab = "", 
+     xlim = c(0, nchar(focal_segment)), 
+     ylim = c(0, 1), 
+     xaxt = "n", 
+     yaxt = "n")
+
+title(main="A Simple Schematic of our Influenza Matrix Primers Binding to cDNA",cex.main=1)
+
+text(x = 1:nchar(focal_segment), 
+     y = rep(1, nchar(focal_segment)), 
+     labels = strsplit(focal_segment, "")[[1]], 
+     cex = 0.7)
+
+text(x = 1:nchar(comp), 
+     y = rep(0.9, nchar(comp)), 
+     labels = strsplit(comp, "")[[1]], 
+     cex = 0.7)
+
+text(x = 1:nchar(comp), 
+     y = rep(0.95, nchar(comp)), 
+     labels = '|', 
+     cex = 0.7)
+
+# The five prime ends
+text(
+  x=c(-1,nchar(focal_segment)+2),
+  y=c(1,0.9),
+  labels="5'"
+)
+
+# the 3 prime ends
+text(
+  x=c(-1,nchar(focal_segment)+2),
+  y=c(0.9,1),
+  labels="3'"
+)
+
+###### Split:
+
+text(labels="Strands after denaturation and primer annealing",y=0.75,x=53)
+
+#Top strand:
+text(x = 1:nchar(focal_segment), 
+     y = rep(0.7, nchar(focal_segment)), 
+     labels = strsplit(focal_segment, "")[[1]], 
+     cex = 0.7)
+
+# Bottom Strand
+text(x = 1:nchar(comp), 
+     y = rep(0.4, nchar(comp)), 
+     labels = strsplit(comp, "")[[1]], 
+     cex = 0.7)
+
+# The five prime ends
+text(
+  x=c(-1,nchar(focal_segment)+2),
+  y=c(0.7,0.4),
+  labels="5'"
+)
+
+# the 3 prime ends
+text(
+  x=c(-1,nchar(focal_segment)+2),
+  y=c(0.4,0.7),
+  labels="3'"
+)
+
+for_char <- as.character(forward)
+text(x = 1:nchar(for_char)+4, # 5-1 since we start at 5 for the sequence
+     y = rep(0.45, nchar(for_char)), 
+     labels = strsplit(for_char, "")[[1]], 
+     cex = 0.7)
+
+rev_char <- as.character(reverse(reverse))
+text(x = 1:nchar(rev_char)+81, # 82-1 since we start at 82 for the sequence
+     y = rep(0.65, nchar(rev_char)), 
+     labels = strsplit(rev_char, "")[[1]], 
+     cex = 0.7)
+
+#finally let's add some pipes and the prime ends
+# ends
+
+## Forward segment:
+text(x=c(3,31),
+     y=c(0.45,0.45),
+     labels=c("5'","3'"))
+text(x = 1:nchar(for_char)+4, # 5-1 since we start at 5 for the sequence
+     y = rep(0.425, nchar(for_char)), 
+     labels = "|", 
+     cex = 0.7)
+
+## Reverse Segment:
+text(x=c(79,106),
+     y=c(0.65,0.65),
+     labels=c("3'","5'"))
+text(x = 1:nchar(rev_char)+81, # 82-1 since we start at 82 for the sequence
+     y = rep(0.675, nchar(rev_char)), 
+     labels = "|", 
+     cex = 0.7)
+
+
+
+arrows(x0=75,x1=60,y0=0.65,y1=0.65,lwd=2,col="blue",length=0.1)
+
+arrows(x0=32,x1=45,y0=0.45,y1=0.45,lwd=2,col="blue",length=0.1)
+
+
+```
+
+Alrighty! That's not bad! I would like to roll this into a function to make sure that it is really generalizable eventually.
+
+### Get_primer_matches function:
+
+```{r}
+
+# Going from sequence to matches
+
+primer1 <- DNAString("AGATGAGTCTTCTAACCGAGGTCG")
+primer2 <- DNAString("TGCAAAAACATCTTCAAGTCTCTG")
+target <- DNAString("AGCAAAAGCAGGTAGATATTGAAAGATGAGTCTTCTAACCGAGGTCGAAACGTACGTTCTCTCTATCGTCCCGTCGGGCCCCCTCAAAGCCGAGATCGCGCAGAGACTTGAAGATGTCTTTGCAGGGAAGAACACCGATCTTGAGGCTCTCATGGAATGGCTAAAGACAAGACCAATCCTGTCACCTCTGACTAAGGGGATTTTGGGATTTGTGTTCACGCTCACCGTGCCCAGTGAGCGAGGACTGCAGCGTAGACGCTTTGTCCAAAATGCTCTAAATGGAAATGGAGACCCAAACAACATGGACAGGGCAGTCAAGTTGTACAGGAAACTGAAGAGAGAGATAACATTCCATGGGGCTAAAGAAGTTGCACTCAGTTACTCAACCGGTGCACTTGCCAGTTGTATGGGTCTCATATACAACAGGATGGGGACGGTGACCGCAGAAGTGGCATTGGGCCTAGTGTGTGCCACATGTGAGCAGATTGCTGATTCACAGCATCGGTCTCACAGACAGATAGCTACCACCACCAACCCACTAATCAGACATGAAAACAGAATGGTGTTGGCCAGTACTACAGCTAAGGCTATGGAGCAGATGGCTGGATCGAGTGAGCAAGCAGTGGAAGCCATGGAGGTTGCTAGTCAGGCTAGGCAGATGGTGCAGGCGATGAGGACCATTGGAACTCATCCTAGCTCCAGTGCCGGTCTGAGAGATGATCTCCTTGAAAATTTGCAGGCCTACCAAAAACGGATGGGAGTGCAACTACAGCGATTCAAGTGATCCTCTCGTTATTGCCGCAAGTATCATTGGGATCTTGCACTTGATATTGTGGATTCTTGATCGCCTTTTCTTCAAATGCGTTTATCGTCGCCTTAAATACGGTTTGAAAGGAGGGCCTTCTACGGAAGGAGTACCTGAGTCCATGAGGGAAGAGTACCGGCAGGAGCAGCAGAGTGCTGTGGATGTTGACGATGGTCATTTTGTCAACATAGAGCTGGAGTAAAAAACTACCTTGTTTCTACT")
+
+get_primer_matches <- function(target=target,forward=primer1,reverse=primer2,max.miss=5){
+  
+# Convert the strings to DNAStrings()
+  
+target <- DNAString(target)
+forward <- DNAString(forward)
+reverse <- DNAString(reverse)
+
+#get the max mismatch value
+max.miss=max.miss
+
+# find the primer 1 matches:  
+p1_match <- Biostrings::matchPattern(pattern = forward,subject = target,max.mismatch = max.miss)
+# test if the match length is 0
+if (length(p1_match@ranges@width)==0){
+  # primer1
+  rcomp_primer1 <- reverseComplement(forward)
+  rcomp_primer1
+  best_match_p1 <- p1_match
+  
+#   print("The forward primer needed to be reverse complemented to be found in your target")
+# p1_rcomp_match <- Biostrings::matchPattern(pattern = reverseComplement((forward)),subject = target,max.mismatch = max.miss)
+# print(p1_rcomp_match)
+# print(rcomp_primer1)
+  print("The forward primer was not found in your sequence. Check to make sure the primer matches or adjust the max.miss value")
+} else {
+  # if the match is not 0 then report the match
+  print("The forward primer matches as is see below....")
+  print(p1_match)
+  best_match_p1 <- p1_match
+}
+
+
+# find the primer 2 matches
+p2_match <- Biostrings::matchPattern(pattern = reverse,subject = target,max.mismatch = max.miss)
+
+# check if the match is there
+if (length(p2_match@ranges@width)==0){
+  # primer2
+  rcomp_primer2 <- reverseComplement(reverse)
+  rcomp_primer2
+  print("The reverse primer needed to be reverse complemented to be found in your target")
+p2_rcomp_match <- Biostrings::matchPattern(pattern = reverseComplement((reverse)),subject = target,max.mismatch = max.miss)
+print(p2_rcomp_match)
+best_match_p2 <- p2_rcomp_match
+} else {
+  print("The reverse primer matches as is see below....")
+  print(p2_match)
+  best_match_p2 <- p2_match
+}
+# Return the matches in a list
+  return(list(p1_match = best_match_p1, p2_match = best_match_p2))
+}
+
+
+
+```
+
+Let's test our the function:
+
+```{r}
+get_primer_matches(target = target,forward = primer1,reverse = primer2,max.miss = 1)
+```
+
+Let's try this function on our COX1 primers! Specifically from this entry [here](https://www.ncbi.nlm.nih.gov/nuccore/PV124930.1)
+
+```{r}
+
+cox1 <- "GTGACCTTTATCAATCGATGATTATTTTCAACAAACCACAAAGATATCGGCACCTTATACTTAATCTTTGGCGCATGAGCTGGCATAGTAGGTACTGCCCTCAGCCTGCTTATCCGTGCAGAACTTGGCCAACCCGGAACCCTCCTAGGAGACGACCAAATCTATAACGTAATTGTCACCGCCCATGCCTTCGTGATAATCTTCTTCATAGTGATACCAATCATGATCGGTGGGTTTGGAAACTGACTAGTCCCACTTATAATCGGTGCCCCTGATATAGCATTTCCACGCATAAACAACATAAGCTTCTGACTATTACCCCCATCATTCCTACTCCTCCTAGCCTCTTCCACAGTAGAAGCTGGAGCCGGCACAGGATGAACAGTATACCCCCCTCTAGCTGGCAATCTAGCCCATGCTGGAGCCTCAGTAGACCTAGCAATCTTCTCTCTTCACTTAGCAGGTGTGTCTTCCATTCTGGGTGCTATCAACTTTATCACTACAGCCATCAACATAAAACCCCCTGCCCTCTCACAATATCAAACCCCACTATTCGTATGATCCGTACTCATCACTGCCGTCCTATTACTACTTTCACTCCCAGTGCTTGCCGCAGGCATTACTATGCTACTTACAGACCGAAACCTAAACACAACATTCTTCGATCCCGCCGGAGGCGGTGACCCTGTACTGTACCAACACCTCTTCTGATTCTTCGGCCACCCAGAAGTATACATCCTAATCCTACCAGGCTTCGGAATCATCTCTCATGTTGTAACATACTACGCAGGTAAAAAAGAGCCATTTGGCTACATAGGAATAGTCTGAGCCATACTATCCATCGGATTCCTAGGTTTCATTGTCTGAGCTCACCACATGTTTACAGTCGGAATAGACGTAGACACCCGAGCATACTTCACATCTGCCACTATAATCATTGCTATCCCTACAGGCATCAAAGTATTTAGCTGATTAGCTACATTACACGGAGGGACTATCAAATGAGACCCCCCAATACTATGAGCCCTGGGTTTCATCTTCCTCTTCACCATTGGCGGTCTCACAGGAATTGTCCTAGCAAACTCCTCCCTAGACATCGCTTTACACGACACATACTACGTAGTTGCCCACTTCCATTATGTCCTCTCAATAGGGGCAGTCTTTGCTATCTTAGCAGGATTTACCCACTGATTCCCCCTATTAACAGGCTATACCCTCCACCCCTCATGAACTAAAGCCCACTTTGGGGTGATATTCACAGGGGTTAACTTAACATTCTTCCCACAGCACTTCCTAGGCTTAGCTGGCATACCACGACGATACTCTGACTACCCAGACGCGTACACCCTATGAAACACCATATCCTCTATCGGCTCACTTATCTCAATAACAGCTGTAATCATGCTAATATTCATCATCTGAGAAGCCTTCGCATCAAAACGAAAAGTCCTACAACCAGAACTAACTGCCACCAATATCGAATGAATCCACGGCTGCCCGCCTCCATACCACACCTTCGAAGAGCCCGCCTTCGTTCAAGTCCAAGAAAGG"
+
+primer1 <- "TTCTCCAACCACAAAGACATTGGCAC"
+primer2 <- "ACTACATGTGAGATGATTCCGAATCCAG"
+
+matchPattern(pattern = (DNAString(primer1)),subject = DNAString(cox1),max.mismatch = 6)
+
+get_primer_matches(target = cox1,forward = primer1,reverse = primer2,max.miss = 6)
+
+```
+
+Ok this works with a little finagling with the amount of missing bases.
+
+Lets make it plot them.
+
+```{r}
+
+# trim the segment
+cox1 <- DNAString(cox1)
+
+par(mar=c(0,0,1,0))
+plot(x=1, 
+     type = "n", 
+     xlab = "", 
+     ylab = "", 
+     xlim = c(0, nchar(cox1)), 
+     ylim = c(0, 1), 
+     xaxt = "n", 
+     yaxt = "n")
+
+title(main="A Simple Schematic of our COX1 primers binding to mitochondrial gene",cex.main=1)
+
+text(x = 1:775, 
+     y = rep(1, 775), 
+     labels = strsplit(as.character(cox1), "")[[1]], 
+     cex = 0.7)
+
+
+```
+
+Ewwww ok so that is a problem......there are two many lines I need to condense it down.
+
+One solution would be to trim to the edges of the sequence and then plot the middle as "....." so with labels between the bases. Let's try that
+
+```{r}
+
+cox1[1:56]
+
+cox1[740:780]
+
+length(c(cox1[1:56]
+,cox1[740:780]))
+
+par(mar=c(0,0,1,0))
+plot(x=1, 
+     type = "n", 
+     xlab = "", 
+     ylab = "", 
+     xlim = c(0,380), 
+     ylim = c(0, 1), 
+     xaxt = "n", 
+     yaxt = "n")
+
+# top part one
+text_x <- seq(1,56*2,by=2)
+text_y <- rep(1,56)
+text(
+  x=text_x,
+  y=text_y,
+  labels=unlist(strsplit(as.character(cox1)[1], ""))[1:56]
+)
+
+# top part two
+text_x <- seq(140,180*2,by=2)
+text_y <- rep(1,40)
+text(
+  x=text_x,
+  y=text_y,
+  labels=unlist(strsplit(as.character(cox1)[1], ""))[740:780]
+)
+
+
+```
+
+
+Ok let's take a different approach let's make it relative to each DNA strand
+
+```{r}
+
+cox1 |> length()/5
+# let's try 300 bp at a time. 
+
+par(mar=c(0,0,1,0))
+plot(x=1, 
+     type = "n", 
+     xlab = "", 
+     ylab = "", 
+     xlim = c(0,300), 
+     ylim = c(0, 1), 
+     xaxt = "n", 
+     yaxt = "n")
+
+# Define the range and step size
+start_val <- 1
+end_val <- 1551
+step_size <- 300
+
+# Generate the starting values for each set
+start_points <- seq(start_val, end_val, by = step_size)
+
+# Loop through the sets
+for (start in start_points) {
+  # Calculate the end value for the current set
+  end <- min(start + step_size - 1, end_val) # Ensure it doesn't exceed end_val
+
+  # Create the sequence for the current set
+  current_set <- start:end
+
+  # Print or process the current set
+  cat("Set from", start, "to", end, ":\n")
+  print(current_set)
+  cat("\n") # Add a newline for better readability
+  # You can replace the print(current_set) with whatever operation you need to perform on the current set.
+}
+
+```
+
+
+```{r}
+for (start in start_points) {
+  # Calculate the end value for the current set
+  end <- min(start + step_size - 1, end_val) # Ensure it doesn't exceed end_val
+
+  # Create the sequence for the current set
+  current_set <- start:end
+
+  # Print or process the current set
+  cat("Set from", start, "to", end, ":\n")
+  print(current_set)
+  cat("\n") # Add a newline for better readability
+  # You can replace the print(current_set) with whatever operation you need to perform on the current set.
+}
+
+plot_sequence_full <- function(sequence_to_plot=target,step_size=300){
+  end_val <- length(sequence_to_plot)
+  start_val <- 1
+  
+  #open a new plot
+  par(mar=c(1,1,1,1))
+  plot(x=1, 
+     type = "n", 
+     xlab = "", 
+     ylab = "", 
+     xlim = c(0,step_size), 
+     ylim = c(0, 6), 
+     xaxt = "n", 
+     yaxt = "n")
+  
+  # Get the start points:
+  start_points <- seq(start_val, end_val, by = step_size)
+  num_lines <- 1:length(start_points)
+  
+  
+  for (start in start_points) {
+    line_num <- which(start_points==start)
+  # Calculate the end value for the current set
+  end <- min(start + step_size - 1, end_val) # Ensure it doesn't exceed end_val
+
+  # Create the sequence for the current set
+    current_set <- start:end
+
+    # get length of section
+    length(current_set)
+
+    # Calculate min and max within the loop
+    min_data <- min(current_set) # Use the whole current set
+    max_data <- max(current_set) # Use the whole current set
+    
+    # line number
+    line_num <- 
+  new_x <- (current_set - min_data) / (max_data - min_data) * 300 # assuming xlim is 0 to 300
+  points(x = new_x,y=rep(num_lines[line_num],length(current_set)),cex=1)
+  }
+  
+
+}
+
+plot_sequence_full(sequence_to_plot = cox1,step_size = 300)
+
+
+```
+
+```{r}
+
+end_val <- length(cox1)
+start_val <- 1
+  
+  #open a new plot
+par(mar=c(1,1,1,1))
+plot(x=1, 
+     type = "n", 
+     xlab = "", 
+     ylab = "", 
+     xlim = c(0,step_size), 
+     ylim = c(0, 1), 
+     xaxt = "n", 
+     yaxt = "n")
+  
+  # Get the start points:
+start_points <- seq(start_val, end_val, by = 80)
+num_lines <- 1:length(start_points)
+# Calculate y-coordinates for lines
+  y_coords <- seq(0, 1,length.out=length(num_lines))
+
+ for (i in 1:length(start_points)) {
+   start=start_points[i]
+    line_num <- length(start_points) - i + 1  
+
+  # Calculate the end value for the current set
+  end <- min(start + step_size - 1, end_val) # Ensure it doesn't exceed end_val
+
+  # Create the sequence for the current set
+    current_set <- start:end
+
+    # get length of section
+    length(current_set)
+
+    # Calculate min and max within the loop
+    min_data <- min(current_set) # Use the whole current set
+    max_data <- max(current_set) # Use the whole current set
+    
+
+  new_x <- (current_set - min_data) / (max_data - min_data) * 300 # assuming xlim is 0 to 300
+  # points(x = new_x,y=rep(num_lines[line_num],length(current_set)),cex=1)
+  text(x = new_x,y=rep(y_coords[line_num],length(current_set)),cex=0.7,labels=strsplit(as.character(cox1[min_data:max_data]),"")[[1]])
+  }
+
+```
+
+Ewww that looks sooooo ugly. Ok new plan let's focus instead on the version where we skip the middle stuff and focus on our primers. 
+
+### Trying the new approach that works. 
+```{r}
+cox1 <- "GTGACCTTTATCAATCGATGATTATTTTCAACAAACCACAAAGATATCGGCACCTTATACTTAATCTTTGGCGCATGAGCTGGCATAGTAGGTACTGCCCTCAGCCTGCTTATCCGTGCAGAACTTGGCCAACCCGGAACCCTCCTAGGAGACGACCAAATCTATAACGTAATTGTCACCGCCCATGCCTTCGTGATAATCTTCTTCATAGTGATACCAATCATGATCGGTGGGTTTGGAAACTGACTAGTCCCACTTATAATCGGTGCCCCTGATATAGCATTTCCACGCATAAACAACATAAGCTTCTGACTATTACCCCCATCATTCCTACTCCTCCTAGCCTCTTCCACAGTAGAAGCTGGAGCCGGCACAGGATGAACAGTATACCCCCCTCTAGCTGGCAATCTAGCCCATGCTGGAGCCTCAGTAGACCTAGCAATCTTCTCTCTTCACTTAGCAGGTGTGTCTTCCATTCTGGGTGCTATCAACTTTATCACTACAGCCATCAACATAAAACCCCCTGCCCTCTCACAATATCAAACCCCACTATTCGTATGATCCGTACTCATCACTGCCGTCCTATTACTACTTTCACTCCCAGTGCTTGCCGCAGGCATTACTATGCTACTTACAGACCGAAACCTAAACACAACATTCTTCGATCCCGCCGGAGGCGGTGACCCTGTACTGTACCAACACCTCTTCTGATTCTTCGGCCACCCAGAAGTATACATCCTAATCCTACCAGGCTTCGGAATCATCTCTCATGTTGTAACATACTACGCAGGTAAAAAAGAGCCATTTGGCTACATAGGAATAGTCTGAGCCATACTATCCATCGGATTCCTAGGTTTCATTGTCTGAGCTCACCACATGTTTACAGTCGGAATAGACGTAGACACCCGAGCATACTTCACATCTGCCACTATAATCATTGCTATCCCTACAGGCATCAAAGTATTTAGCTGATTAGCTACATTACACGGAGGGACTATCAAATGAGACCCCCCAATACTATGAGCCCTGGGTTTCATCTTCCTCTTCACCATTGGCGGTCTCACAGGAATTGTCCTAGCAAACTCCTCCCTAGACATCGCTTTACACGACACATACTACGTAGTTGCCCACTTCCATTATGTCCTCTCAATAGGGGCAGTCTTTGCTATCTTAGCAGGATTTACCCACTGATTCCCCCTATTAACAGGCTATACCCTCCACCCCTCATGAACTAAAGCCCACTTTGGGGTGATATTCACAGGGGTTAACTTAACATTCTTCCCACAGCACTTCCTAGGCTTAGCTGGCATACCACGACGATACTCTGACTACCCAGACGCGTACACCCTATGAAACACCATATCCTCTATCGGCTCACTTATCTCAATAACAGCTGTAATCATGCTAATATTCATCATCTGAGAAGCCTTCGCATCAAAACGAAAAGTCCTACAACCAGAACTAACTGCCACCAATATCGAATGAATCCACGGCTGCCCGCCTCCATACCACACCTTCGAAGAGCCCGCCTTCGTTCAAGTCCAAGAAAGG"
+
+primer1 <- "TTCTCCAACCACAAAGACATTGGCAC"
+primer2 <- "ACTACATGTGAGATGATTCCGAATCCAG"
+
+get_primer_matches(target = cox1,forward = primer1,reverse = primer2,max.miss = 6)
+
+###########################
+
+obj1 <- DNAString(cox1)[25:55]
+obj1
+
+obj2 <- DNAString(cox1)[745:780]
+obj2
+
+length(c(obj1,obj2))
+
+par(mar=c(1,1,1,1))
+plot(x=1, 
+     type = "n", 
+     xlab = "", 
+     ylab = "", 
+     xlim = c(0,100), 
+     ylim = c(0, 1), 
+     xaxt = "n", 
+     yaxt = "n")
+
+text(
+  x=1:length(obj1)+5,
+  y=rep(1,length(obj1)),
+  labels=strsplit(as.character(obj1),"")[[1]]
+)
+text(
+  x=1:length(obj2)+59, # adding 59 to get spacing right.
+  y=rep(1,length(obj2)),
+  labels=strsplit(as.character(obj1),"")[[1]])
+
+# ... your plot setup code ...
+
+plot_sequence_full <- function(gap_size=20,seq1,seq2,xlim=100){
+par(mar=c(1,1,1,1))
+plot(x=1, 
+     type = "n", 
+     xlab = "", 
+     ylab = "", 
+     xlim = c(0,xlim), 
+     ylim = c(0, 1), 
+     xaxt = "n", 
+     yaxt = "n")
+
+obj1 <- seq1
+
+obj2 <- seq2
+# Calculate space available for sequences and spacing between them
+available_space <- xlim - 5 - 5 - gap_size  # 5 spaces on each side, minus gap
+
+# Calculate the space needed for each letter in each segment
+space_per_letter <- available_space / (length(obj1) + length(obj2)) 
+
+# Calculate the starting position for each segment
+start_1 <- 5  # 5 spaces to the left
+start_2 <- start_1 + length(obj1) * space_per_letter + gap_size  # Add gap between
+
+# Create x-coordinates for each segment
+x_coords_1 <- seq(start_1, start_1 + (length(obj1) - 1) * space_per_letter, length.out = length(obj1))
+x_coords_2 <- seq(start_2, start_2 + (length(obj2) - 1) * space_per_letter, length.out = length(obj2))
+
+# Plot the text
+text(x = x_coords_1, y = rep(1, length(obj1)), labels = strsplit(as.character(obj1), "")[[1]])
+text(x = x_coords_2, y = rep(1, length(obj2)), labels = strsplit(as.character(obj2), "")[[1]])
+}
+
+plot_sequence_full(gap_size = 10,seq1 = obj1,seq2 = obj2,xlim = 100)
+
+
+```
+
+Ok this worked so we want to also add in the complementary strands for these as well. And the dots. 
+
+```{r}
+plot_sequence_full <- function(gap_size=20,seq1,seq2,xlim=100,seperation_width=0.1,forward_primer=primer1,reverse_primer=primer2,max.miss = 6,target=NULL,plot_elongation=F){
+
+  # get some basic plotting windows open
+par(mar=c(1,1,1,1))
+plot(x=1, 
+     type = "n", 
+     xlab = "", 
+     ylab = "", 
+     xlim = c(0,xlim), 
+     ylim = c(0, 1.1), 
+     xaxt = "n", 
+     yaxt = "n")
+
+
+# define your sequences and the reverse comps
+obj1 <- seq1
+comp_obj1 <- complement(seq1) # computes the complement
+obj2 <- seq2
+comp_obj2 <- complement(seq2) # computes the complement
+
+
+# Forward Primer:
+forward_p <- DNAString(forward_primer)
+
+# Reverse Primer:
+reverse_p <- DNAString(reverse_primer)
+reverse_p <- reverseComplement(reverse_p)
+
+#max mismatch
+max.miss=max.miss
+
+# Add text for original sequence:
+
+text(labels="COX1 Gene Target",
+     x=50,
+     y=1.1)
+
+# Calculate space available for sequences and spacing between them
+available_space <- xlim - 5 - 5 - gap_size  # 5 spaces on each side, minus gap
+
+# Calculate the space needed for each letter in each segment
+space_per_letter <- available_space / (length(obj1) + length(obj2)) 
+
+# Calculate the starting position for each segment
+start_1 <- 5  # 5 spaces to the left
+start_2 <- start_1 + length(obj1) * space_per_letter + gap_size  # Add gap between
+
+# Create x-coordinates for each segment
+x_coords_1 <- seq(start_1, start_1 + (length(obj1) - 1) * space_per_letter, length.out = length(obj1))
+x_coords_2 <- seq(start_2, start_2 + (length(obj2) - 1) * space_per_letter, length.out = length(obj2))
+
+# Plot the text and the complement:
+text(x = x_coords_1, y = rep(1, length(obj1)), labels = strsplit(as.character(obj1), "")[[1]])
+text(x = x_coords_1, y = rep(0.9, length(comp_obj1)), labels = strsplit(as.character(comp_obj1), "")[[1]])
+
+text(x = x_coords_2, y = rep(1, length(obj2)), labels = strsplit(as.character(obj2), "")[[1]])
+text(x = x_coords_2, y = rep(0.9, length(comp_obj2)), labels = strsplit(as.character(comp_obj2), "")[[1]])
+
+# Plot the points between the segments:
+## Top segments
+points(x=(max(x_coords_1)+1):(min(x_coords_2)-1),y=rep(0.995,length((max(x_coords_1)+1):(min(x_coords_2)-1))),pch=21,bg="black",cex=0.5)
+
+#bottom segments
+points(x=(max(x_coords_1)+1):(min(x_coords_2)-1),y=rep(0.895,length((max(x_coords_1)+1):(min(x_coords_2)-1))),pch=21,bg="black",cex=0.5)
+
+
+# let's add in the primes
+text(
+  x=c(2,98),
+  y=c(1,1),
+  labels=c("5'","3'")
+)
+text(
+  x=c(2,98),
+  y=c(0.9,0.9),
+  labels=c("3'","5'")
+)
+
+# let's add some of our text lines between the points.
+text(x = x_coords_1, y = rep(0.95, length(comp_obj1)), labels = "|")
+text(x = x_coords_2, y = rep(0.95, length(comp_obj2)), labels = "|")
+
+# add if statement for seperation
+
+# plot text
+text(x = 50,y=0.8,labels="Strands after denaturation and primer annealing")
+
+# plot seperated strands:
+text(x = x_coords_1, y = rep(0.75, length(obj1)), labels = strsplit(as.character(obj1), "")[[1]])
+text(x = x_coords_1, y = rep(0.75-seperation_width, length(comp_obj1)), labels = strsplit(as.character(comp_obj1), "")[[1]])
+
+text(x = x_coords_2, y = rep(0.75, length(obj2)), labels = strsplit(as.character(obj2), "")[[1]])
+text(x = x_coords_2, y = rep(0.75-seperation_width, length(comp_obj2)), labels = strsplit(as.character(comp_obj2), "")[[1]])
+
+# Plot the prime ends for the seperated strands:
+text(
+  x=c(2,98),
+  y=c(0.75,0.75-seperation_width),
+  labels=c("5'","3'")
+)
+text(
+  x=c(2,98),
+  y=c(0.75-seperation_width,0.75),
+  labels=c("3'","5'")
+)
+
+# add if statement for primers
+
+## Forward Primer
+prim_start1 <- matchPattern(pattern = forward_p,subject = seq1,max.mismatch = 6)@ranges@start
+prim_end1 <- matchPattern(pattern = forward_p,subject = seq1,max.mismatch = 6)@ranges@width+prim_start1-1
+text(x = x_coords_1[prim_start1:prim_end1], # 5-1 since we start at 5 for the sequence
+     y = rep((0.8-seperation_width), length(forward_p)),
+     labels = strsplit(as.character(forward_p), "")[[1]])
+# since we know the positions of the start and end we can get the 'proper' sequence it should be if a perfect match. 
+perf_match1 <- seq1[prim_start1:prim_end1]
+perf_match1 <- strsplit(as.character(perf_match1), "")[[1]]
+prim1_match <- strsplit(as.character(forward_p), "")[[1]]
+# Compare the letters and get 0/1 output
+x_coords_1<- x_coords_1[prim_start1:prim_end1]
+comparison_result <- ifelse(perf_match1 == prim1_match, 1, 0)
+points(x = x_coords_1[comparison_result == 1], y = rep(0.775-seperation_width, sum(comparison_result)), cex=1,pch="*")
+
+## Reverse Primer:
+prim_start2 <- matchPattern(pattern = reverse_p,subject = seq2,max.mismatch = 6)@ranges@start
+
+prim_end2 <- matchPattern(pattern = reverse_p,subject = seq2,max.mismatch = 6)@ranges@width+prim_start2-1
+text(x = x_coords_2[prim_start2:prim_end2], # 5-1 since we start at 5 for the sequence
+     y = rep((0.7), length(reverse_p)),
+     labels = strsplit(as.character(complement(reverse_p)), "")[[1]])
+# since we know the positions of the start and end we can get the 'proper' sequence it should be if a perfect match. 
+perf_match2 <- seq2[prim_start2:prim_end2]
+perf_match2 <- strsplit(as.character(perf_match2), "")[[1]]
+prim2_match <- strsplit(as.character((reverse_p)), "")[[1]]
+# Compare the letters and get 0/1 output
+x_coords_2<- x_coords_2[prim_start2:prim_end2]
+comparison_result <- ifelse(perf_match2 == prim2_match, 1, 0)
+points(x = x_coords_2[comparison_result == 1], y = rep(0.725, sum(comparison_result)), cex=1,pch="*")
+
+# add if statment for arrows
+
+## Forward
+arrows(x0=max(x_coords_1)+1,x1=max(x_coords_1)+10,y0=0.8-seperation_width,y1=0.8-seperation_width,lwd=2,col="blue",length=0.1)
+
+## Reverse
+arrows(x1=min(x_coords_2)-10,x0=min(x_coords_2)-1,y0=00.7,y1=0.7,lwd=2,col="blue",length=0.1)
+
+
+# add if statement for elongation:
+
+
+
+# Plot the replicated strands:
+x_coords_1 <- seq(start_1, start_1 + (length(obj1) - 1) * space_per_letter, length.out = length(obj1))
+x_coords_2 <- seq(start_2, start_2 + (length(obj2) - 1) * space_per_letter, length.out = length(obj2))
+## Plot part one 
+### Plot first replicant
+
+# text(x = x_coords_1, y = rep(0.4, length(obj1)), labels = strsplit(as.character(obj1), "")[[1]])
+# text(x = x_coords_1, y = rep(0.35, length(comp_obj1)), labels = strsplit(as.character(comp_obj1), "")[[1]])
+# ### Plot second replicant
+# text(x = x_coords_1, y = rep(0.2, length(obj1)), labels = strsplit(as.character(obj1), "")[[1]])
+# text(x = x_coords_1, y = rep(0.15, length(comp_obj1)), labels = strsplit(as.character(comp_obj1), "")[[1]])
+# 
+# ## Plot part two
+# text(x = x_coords_2, y = rep(0.4, length(obj2)), labels = strsplit(as.character(obj2), "")[[1]])
+# text(x = x_coords_2, y = rep(0.35, length(comp_obj2)), labels = strsplit(as.character(comp_obj2), "")[[1]])
+
+
+if (!is.null(target)& plot_elongation==T) {
+    # If optional_arg is provided, do something with it
+  text(x = 50,y=0.75-seperation_width-0.1,labels="Strands after first elongation step (simple view)")
+    obj3 <- DNAString(target)
+    print(obj3)
+    x.temp<-get_primer_matches(target = obj3,forward = forward_p,reverse = reverse_p,max.miss = 6)
+    
+    #Find the template sequence that is amplified:
+    x.temp$p1_match@ranges@start+x.temp$p1_match@ranges@width->amp_start
+    x.temp$p2_match@ranges@start ->amp_end
+    amp_gene <- obj3[amp_start:amp_end]
+     # print(amp_gene)
+    # space_per_letter_amp <- (xlim)/nchar(amp_gene)
+    # print(space_per_letter_amp)
+    # x_coords_amp <- seq(0,(length(amp_gene) - 1) * space_per_letter_amp, length.out = length(amp_gene))
+    # print(x_coords_amp)
+    # text(x = x_coords_amp,
+    #      y=rep(0.1,length(x_coords_amp)),
+    #      labels=strsplit(x=as.character(amp_gene),split="")[[1]],
+    #      cex=0.2)
+    
+    # Plot lines
+    lines(x=c(20,80),y=c(0.7-seperation_width-0.1,0.7-seperation_width-0.1),lwd=2)
+    lines(x=c(20,80),y=c(0.7-seperation_width-0.1-0.05,0.7-seperation_width-0.1-0.05),lwd=2,col="blue")
+    
+       lines(x=c(20,80),y=c(0.5-seperation_width-0.1,0.5-seperation_width-0.1),lwd=2)
+    lines(x=c(20,80),y=c(0.5-seperation_width-0.1-0.05,0.5-seperation_width-0.1-0.05),lwd=2,col="blue")
+ 
+    #plot line legend
+  legend(x = -3,y=0.2,legend=c("Original Strand","New Strand"),col = c("black","blue"),lty=1,lwd = 2,bty = "n")
+
+  # Plot bp length of amplified segment
+  text(x=50,
+       y=0,
+       labels=paste("Amplified segment is",length(amp_gene),"base pairs long"),)
+  }
+
+}
+
+
+#### Run the function:
+plot_sequence_full(gap_size = 15,seq1 = obj1,seq2 = obj2,xlim = 100,seperation_width = 0.2,max.miss = 6,target = cox1,plot_elongation = T)
+
+
+
+
+```
+
+Things to add:
+
+* Points between the denatured segments
+* Elongation steps.
+* Add a amplified segment 
+* You want the audience to be clear on where and how long the amplified region is. 
+
+[] Make a slide deck for all of these lazy things that you have made in the lab. 
+
+### Prooftesting
+Proof testing the function with the original M-gene virus.
+
+```{r}
+# Load the functions:
+# matching
+get_primer_matches <- function(target=target,forward=primer1,reverse=primer2,max.miss=5){
+  
+# Convert the strings to DNAStrings()
+  
+target <- DNAString(target)
+forward <- DNAString(forward)
+reverse <- DNAString(reverse)
+
+#get the max mismatch value
+max.miss=max.miss
+
+# find the primer 1 matches:  
+p1_match <- Biostrings::matchPattern(pattern = forward,subject = target,max.mismatch = max.miss)
+# test if the match length is 0
+if (length(p1_match@ranges@width)==0){
+  # primer1
+  rcomp_primer1 <- reverseComplement(forward)
+  rcomp_primer1
+  best_match_p1 <- p1_match
+  
+#   print("The forward primer needed to be reverse complemented to be found in your target")
+# p1_rcomp_match <- Biostrings::matchPattern(pattern = reverseComplement((forward)),subject = target,max.mismatch = max.miss)
+# print(p1_rcomp_match)
+# print(rcomp_primer1)
+  print("The forward primer was not found in your sequence. Check to make sure the primer matches or adjust the max.miss value")
+} else {
+  # if the match is not 0 then report the match
+  print("The forward primer matches as is see below....")
+  print(p1_match)
+  best_match_p1 <- p1_match
+}
+
+
+# find the primer 2 matches
+p2_match <- Biostrings::matchPattern(pattern = reverse,subject = target,max.mismatch = max.miss)
+
+# check if the match is there
+if (length(p2_match@ranges@width)==0){
+  # primer2
+  rcomp_primer2 <- reverseComplement(reverse)
+  rcomp_primer2
+  print("The reverse primer needed to be reverse complemented to be found in your target")
+p2_rcomp_match <- Biostrings::matchPattern(pattern = reverseComplement((reverse)),subject = target,max.mismatch = max.miss)
+print(p2_rcomp_match)
+best_match_p2 <- p2_rcomp_match
+} else {
+  print("The reverse primer matches as is see below....")
+  print(p2_match)
+  best_match_p2 <- p2_match
+}
+# Return the matches in a list
+  return(list(p1_match = best_match_p1, p2_match = best_match_p2))
+}
+
+#plotting
+plot_sequence_full <- function(gap_size=20,seq1,seq2,xlim=100,seperation_width=0.1,forward_primer=primer1,reverse_primer=primer2,max.miss = 6,target=NULL,plot_elongation=F){
+
+  # get some basic plotting windows open
+par(mar=c(1,1,1,1))
+plot(x=1, 
+     type = "n", 
+     xlab = "", 
+     ylab = "", 
+     xlim = c(0,xlim), 
+     ylim = c(0, 1.1), 
+     xaxt = "n", 
+     yaxt = "n")
+
+
+# define your sequences and the reverse comps
+obj1 <- seq1
+comp_obj1 <- complement(seq1) # computes the complement
+obj2 <- seq2
+comp_obj2 <- complement(seq2) # computes the complement
+
+
+# Forward Primer:
+forward_p <- DNAString(forward_primer)
+
+# Reverse Primer:
+reverse_p <- DNAString(reverse_primer)
+reverse_p <- reverseComplement(reverse_p)
+
+#max mismatch
+max.miss=max.miss
+
+# Add text for original sequence:
+
+text(labels="COX1 Gene Target",
+     x=50,
+     y=1.1)
+
+# Calculate space available for sequences and spacing between them
+available_space <- xlim - 5 - 5 - gap_size  # 5 spaces on each side, minus gap
+
+# Calculate the space needed for each letter in each segment
+space_per_letter <- available_space / (length(obj1) + length(obj2)) 
+
+# Calculate the starting position for each segment
+start_1 <- 5  # 5 spaces to the left
+start_2 <- start_1 + length(obj1) * space_per_letter + gap_size  # Add gap between
+
+# Create x-coordinates for each segment
+x_coords_1 <- seq(start_1, start_1 + (length(obj1) - 1) * space_per_letter, length.out = length(obj1))
+x_coords_2 <- seq(start_2, start_2 + (length(obj2) - 1) * space_per_letter, length.out = length(obj2))
+
+# Plot the text and the complement:
+text(x = x_coords_1, y = rep(1, length(obj1)), labels = strsplit(as.character(obj1), "")[[1]])
+text(x = x_coords_1, y = rep(0.9, length(comp_obj1)), labels = strsplit(as.character(comp_obj1), "")[[1]])
+
+text(x = x_coords_2, y = rep(1, length(obj2)), labels = strsplit(as.character(obj2), "")[[1]])
+text(x = x_coords_2, y = rep(0.9, length(comp_obj2)), labels = strsplit(as.character(comp_obj2), "")[[1]])
+
+# Plot the points between the segments:
+## Top segments
+points(x=(max(x_coords_1)+1):(min(x_coords_2)-1),y=rep(0.995,length((max(x_coords_1)+1):(min(x_coords_2)-1))),pch=21,bg="black",cex=0.5)
+
+#bottom segments
+points(x=(max(x_coords_1)+1):(min(x_coords_2)-1),y=rep(0.895,length((max(x_coords_1)+1):(min(x_coords_2)-1))),pch=21,bg="black",cex=0.5)
+
+
+# let's add in the primes
+text(
+  x=c(2,98),
+  y=c(1,1),
+  labels=c("5'","3'")
+)
+text(
+  x=c(2,98),
+  y=c(0.9,0.9),
+  labels=c("3'","5'")
+)
+
+# let's add some of our text lines between the points.
+text(x = x_coords_1, y = rep(0.95, length(comp_obj1)), labels = "|")
+text(x = x_coords_2, y = rep(0.95, length(comp_obj2)), labels = "|")
+
+# add if statement for seperation
+
+# plot text
+text(x = 50,y=0.8,labels="Strands after denaturation and primer annealing")
+
+# plot seperated strands:
+text(x = x_coords_1, y = rep(0.75, length(obj1)), labels = strsplit(as.character(obj1), "")[[1]])
+text(x = x_coords_1, y = rep(0.75-seperation_width, length(comp_obj1)), labels = strsplit(as.character(comp_obj1), "")[[1]])
+
+text(x = x_coords_2, y = rep(0.75, length(obj2)), labels = strsplit(as.character(obj2), "")[[1]])
+text(x = x_coords_2, y = rep(0.75-seperation_width, length(comp_obj2)), labels = strsplit(as.character(comp_obj2), "")[[1]])
+
+# Plot the prime ends for the seperated strands:
+text(
+  x=c(2,98),
+  y=c(0.75,0.75-seperation_width),
+  labels=c("5'","3'")
+)
+text(
+  x=c(2,98),
+  y=c(0.75-seperation_width,0.75),
+  labels=c("3'","5'")
+)
+
+# add if statement for primers
+
+## Forward Primer
+prim_start1 <- matchPattern(pattern = forward_p,subject = seq1,max.mismatch = 6)@ranges@start
+prim_end1 <- matchPattern(pattern = forward_p,subject = seq1,max.mismatch = 6)@ranges@width+prim_start1-1
+text(x = x_coords_1[prim_start1:prim_end1], # 5-1 since we start at 5 for the sequence
+     y = rep((0.8-seperation_width), length(forward_p)),
+     labels = strsplit(as.character(forward_p), "")[[1]])
+# since we know the positions of the start and end we can get the 'proper' sequence it should be if a perfect match. 
+perf_match1 <- seq1[prim_start1:prim_end1]
+perf_match1 <- strsplit(as.character(perf_match1), "")[[1]]
+prim1_match <- strsplit(as.character(forward_p), "")[[1]]
+# Compare the letters and get 0/1 output
+x_coords_1<- x_coords_1[prim_start1:prim_end1]
+comparison_result <- ifelse(perf_match1 == prim1_match, 1, 0)
+points(x = x_coords_1[comparison_result == 1], y = rep(0.775-seperation_width, sum(comparison_result)), cex=1,pch="*")
+
+## Reverse Primer:
+prim_start2 <- matchPattern(pattern = reverse_p,subject = seq2,max.mismatch = 6)@ranges@start
+
+prim_end2 <- matchPattern(pattern = reverse_p,subject = seq2,max.mismatch = 6)@ranges@width+prim_start2-1
+text(x = x_coords_2[prim_start2:prim_end2], # 5-1 since we start at 5 for the sequence
+     y = rep((0.7), length(reverse_p)),
+     labels = strsplit(as.character(complement(reverse_p)), "")[[1]])
+# since we know the positions of the start and end we can get the 'proper' sequence it should be if a perfect match. 
+perf_match2 <- seq2[prim_start2:prim_end2]
+perf_match2 <- strsplit(as.character(perf_match2), "")[[1]]
+prim2_match <- strsplit(as.character((reverse_p)), "")[[1]]
+# Compare the letters and get 0/1 output
+x_coords_2<- x_coords_2[prim_start2:prim_end2]
+comparison_result <- ifelse(perf_match2 == prim2_match, 1, 0)
+points(x = x_coords_2[comparison_result == 1], y = rep(0.725, sum(comparison_result)), cex=1,pch="*")
+
+# add if statment for arrows
+
+## Forward
+arrows(x0=max(x_coords_1)+1,x1=max(x_coords_1)+10,y0=0.8-seperation_width,y1=0.8-seperation_width,lwd=2,col="blue",length=0.1)
+
+## Reverse
+arrows(x1=min(x_coords_2)-10,x0=min(x_coords_2)-1,y0=00.7,y1=0.7,lwd=2,col="blue",length=0.1)
+
+
+# add if statement for elongation:
+
+
+
+# Plot the replicated strands:
+x_coords_1 <- seq(start_1, start_1 + (length(obj1) - 1) * space_per_letter, length.out = length(obj1))
+x_coords_2 <- seq(start_2, start_2 + (length(obj2) - 1) * space_per_letter, length.out = length(obj2))
+## Plot part one 
+### Plot first replicant
+
+# text(x = x_coords_1, y = rep(0.4, length(obj1)), labels = strsplit(as.character(obj1), "")[[1]])
+# text(x = x_coords_1, y = rep(0.35, length(comp_obj1)), labels = strsplit(as.character(comp_obj1), "")[[1]])
+# ### Plot second replicant
+# text(x = x_coords_1, y = rep(0.2, length(obj1)), labels = strsplit(as.character(obj1), "")[[1]])
+# text(x = x_coords_1, y = rep(0.15, length(comp_obj1)), labels = strsplit(as.character(comp_obj1), "")[[1]])
+# 
+# ## Plot part two
+# text(x = x_coords_2, y = rep(0.4, length(obj2)), labels = strsplit(as.character(obj2), "")[[1]])
+# text(x = x_coords_2, y = rep(0.35, length(comp_obj2)), labels = strsplit(as.character(comp_obj2), "")[[1]])
+
+
+if (!is.null(target)& plot_elongation==T) {
+    # If optional_arg is provided, do something with it
+  text(x = 50,y=0.75-seperation_width-0.1,labels="Strands after first elongation step (simple view)")
+    obj3 <- DNAString(target)
+    print(obj3)
+    x.temp<-get_primer_matches(target = obj3,forward = forward_p,reverse = reverse_p,max.miss = 6)
+    
+    #Find the template sequence that is amplified:
+    x.temp$p1_match@ranges@start+x.temp$p1_match@ranges@width->amp_start
+    x.temp$p2_match@ranges@start ->amp_end
+    amp_gene <- obj3[amp_start:amp_end]
+     # print(amp_gene)
+    # space_per_letter_amp <- (xlim)/nchar(amp_gene)
+    # print(space_per_letter_amp)
+    # x_coords_amp <- seq(0,(length(amp_gene) - 1) * space_per_letter_amp, length.out = length(amp_gene))
+    # print(x_coords_amp)
+    # text(x = x_coords_amp,
+    #      y=rep(0.1,length(x_coords_amp)),
+    #      labels=strsplit(x=as.character(amp_gene),split="")[[1]],
+    #      cex=0.2)
+    
+    # Plot lines
+    lines(x=c(20,80),y=c(0.7-seperation_width-0.1,0.7-seperation_width-0.1),lwd=2)
+    lines(x=c(20,80),y=c(0.7-seperation_width-0.1-0.05,0.7-seperation_width-0.1-0.05),lwd=2,col="blue")
+    
+       lines(x=c(20,80),y=c(0.5-seperation_width-0.1,0.5-seperation_width-0.1),lwd=2)
+    lines(x=c(20,80),y=c(0.5-seperation_width-0.1-0.05,0.5-seperation_width-0.1-0.05),lwd=2,col="blue")
+ 
+    #plot line legend
+  legend(x = -3,y=0.2,legend=c("Original Strand","New Strand"),col = c("black","blue"),lty=1,lwd = 2,bty = "n")
+
+  # Plot bp length of amplified segment
+  text(x=50,
+       y=0,
+       labels=paste("Amplified segment is",length(amp_gene),"base pairs long"),)
+  }
+
+}
+
+```
+
+
+```{r}
+
+mgene_forward <- DNAString("AGATGAGTCTTCTAACCGAGGTCG")
+mgene_reverse <- DNAString("TGCAAAAACATCTTCAAGTCTCTG")
+mgene <- DNAString("AGCAAAAGCAGGTAGATATTGAAAGATGAGTCTTCTAACCGAGGTCGAAACGTACGTTCTCTCTATCGTCCCGTCGGGCCCCCTCAAAGCCGAGATCGCGCAGAGACTTGAAGATGTCTTTGCAGGGAAGAACACCGATCTTGAGGCTCTCATGGAATGGCTAAAGACAAGACCAATCCTGTCACCTCTGACTAAGGGGATTTTGGGATTTGTGTTCACGCTCACCGTGCCCAGTGAGCGAGGACTGCAGCGTAGACGCTTTGTCCAAAATGCTCTAAATGGAAATGGAGACCCAAACAACATGGACAGGGCAGTCAAGTTGTACAGGAAACTGAAGAGAGAGATAACATTCCATGGGGCTAAAGAAGTTGCACTCAGTTACTCAACCGGTGCACTTGCCAGTTGTATGGGTCTCATATACAACAGGATGGGGACGGTGACCGCAGAAGTGGCATTGGGCCTAGTGTGTGCCACATGTGAGCAGATTGCTGATTCACAGCATCGGTCTCACAGACAGATAGCTACCACCACCAACCCACTAATCAGACATGAAAACAGAATGGTGTTGGCCAGTACTACAGCTAAGGCTATGGAGCAGATGGCTGGATCGAGTGAGCAAGCAGTGGAAGCCATGGAGGTTGCTAGTCAGGCTAGGCAGATGGTGCAGGCGATGAGGACCATTGGAACTCATCCTAGCTCCAGTGCCGGTCTGAGAGATGATCTCCTTGAAAATTTGCAGGCCTACCAAAAACGGATGGGAGTGCAACTACAGCGATTCAAGTGATCCTCTCGTTATTGCCGCAAGTATCATTGGGATCTTGCACTTGATATTGTGGATTCTTGATCGCCTTTTCTTCAAATGCGTTTATCGTCGCCTTAAATACGGTTTGAAAGGAGGGCCTTCTACGGAAGGAGTACCTGAGTCCATGAGGGAAGAGTACCGGCAGGAGCAGCAGAGTGCTGTGGATGTTGACGATGGTCATTTTGTCAACATAGAGCTGGAGTAAAAAACTACCTTGTTTCTACT")
+
+get_primer_matches(target = mgene,forward = mgene_forward,reverse = mgene_reverse,max.miss = 1)
+
+mgene[19:55]->seq1
+mgene[90:130]->seq2
+
+plot_sequence_full(gap_size = 10,seq1 = seq1,seq2=seq2,xlim = 100,seperation_width = 0.2,forward_primer = mgene_forward,reverse_primer = mgene_reverse,max.miss = 6,target = mgene,plot_elongation = T)
+
+
+```
+
+
+Huuray!!!! This works! and it works on two different genes! Awesome we can clean this up another time!
+
+
+```{r}
+cox1_fish <- ("acagttgagt gacgcacccg gaagtaacgt ggtaaagaag agaggtcact ttgcttctgttttggtaatg ttttgattta gcaacactgc tgataattat ggaagcaacc aaagcagaggagcctttcct gaggcatgtg gagacagatg tactcatccc caagatgatg agggagaaagccaaggagct ctgtgctgaa aaggttacag cgttcaacca ctgttgtaaa gagactggtttcctgatggt gttcaagtgt cgggatcaga acgctgccct gaaggagtgt ctgaccgtacactacagaga ctctgcgttc ttcgaggagt gcaagcagga gtacatcaag gagaagctggagtaccagag gacaggggtg gcggctaaga accgctcaca aaaactacca accagcatgtaggttccaaa ttgacccctg acccctgaac atgttgcttc cacctgtcca atcctctcagatctacggga ttggttcggt agcaggggct aggggtcaca gagggtggca gggggagtgagggctactca cggggcttta cagtgtgtgt attgtacatc tggttgggat gctcattgccccaacgggag gaactagatc aacgaagggg cagtagacag gaggacatcc taggccctaagtgacctgtg taacgactac gaggcagatt ggcaaggtgt gtctaaaggc ctccgttcacctgtatgtag ggaaaaggaa tctcttacag atacgtgttc tcaacagagt ccctctggttgatctgatca aacagtcagg atggaaaatc acactgttct caacagagtc cctctggttgatctgatcaa acagccagga tggaaaaatc acactgttcc tcctatttca gaattatcaataatgttttg ttgttgatgc tgtctgtcgg ctctgcaatt tgtatattta tgaagaattctttctgtcaa tgctttggga gcgttttcat gttgagtttg ttagcaacca atactgtccaaagtgagatt gattccaatg atataagacc tgtccaaagt acatgaataa tagtcaaggtgttaacatcc caacatcctc cactatgaga atgttccgga aggttcgtaa ttatacacaagattgatact gcatagaggc tccatcccgt agttaggatt caccggtgag ttgccgtaacgaccggtgaa gcattatggg tagagagttg ttgtaaaaaa aaaggtctgatttttaatataacatttgacttgacattgtgttaacgtacatataaataaagacaaacaatcttcta")
+
+cox1_fish <- str_replace_all(string = cox1_fish,pattern = " ",replacement = "")
+
+cox1_fish <- DNAString(cox1_fish)
+
+primer1 <- DNAString("AGATGAGTCTTCTAACCGAGGTCG")
+primer2 <- DNAString("TGCAAAAACATCTTCAAGTCTCTG")
+
+get_primer_matches(target = cox1_fish,
+                   forward = primer1,
+                   reverse = primer2 ,
+                   max.miss = 9)
+
+
+
+```
+
+Hmmm the trout fish COX1 gene also matches but after opening up the specificity of the mismatch. We will see what happens when we blast it. 
+
